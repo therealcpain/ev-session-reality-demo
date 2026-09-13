@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EV Session Reality — kWh + minutes + fees → all-in $ / effective $/kWh</title>
+  <meta name="description" content="Paste charger rates + kWh + minutes + idle/session fees. Get one shareable card: true all-in $, effective $/kWh, and a fee stack (energy · time · session · idle). Your numbers only. Estimates; networks vary.">
+  <meta name="theme-color" content="#0b0f14">
+  <meta property="og:title" content="EV Session Reality">
+  <meta property="og:description" content="Paste your session — true all-in $ + effective $/kWh + fee stack. Share card. Estimates only; networks vary.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="wrap">
+    <header class="site">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">EV</div>
+        <div>
+          <h1>EV Session Reality</h1>
+          <p class="tagline">Paste kWh + minutes + fees → all-in $ · effective $/kWh · fee stack.</p>
+        </div>
+      </div>
+      <span class="badge">Estimates · networks vary</span>
+    </header>
+
+    <aside class="myth-banner" role="note">
+      <strong>Honesty first.</strong>
+      This card does <em>math on what you paste</em> — it does <strong>not</strong> scrape ChargePoint, EVgo, Electrify America, or any network, and it does <strong>not</strong> invent live rates.
+      Seeds are labeled teaching receipts (including public news reconstructions).
+      Check the app price <em>before</em> you plug. Sources:
+      <a href="https://www.chargepoint.com/drivers/support/faqs/what-service-fee" target="_blank" rel="noopener noreferrer">ChargePoint Service Fee FAQ</a>
+      ·
+      <a href="https://www.chargepoint.com/drivers/support/faqs/what-are-pricing-policies-and-fees-i-should-be-aware" target="_blank" rel="noopener noreferrer">pricing policies FAQ</a>
+      ·
+      <a href="https://www.thedrive.com/news/ev-renter-hit-with-418-charging-bill-after-using-dealers-public-charger" target="_blank" rel="noopener noreferrer">The Drive · $418 dealer bill (Sep 1 2026)</a>
+      ·
+      <a href="https://electrek.co/2026/09/05/when-public-charging-stations-arent-so-public-and-why-it-matters/" target="_blank" rel="noopener noreferrer">Electrek follow-up (Sep 5 2026)</a>.
+    </aside>
+
+    <section class="panel lookup" aria-labelledby="lookup-heading">
+      <h2 id="lookup-heading">1. Paste your session numbers</h2>
+      <p class="hint">
+        kWh delivered, energy rate (or total energy $), minutes connected, per-minute rate if any, session fee, idle fee.
+        Optional: a “typical DCFC” reference $/kWh for a vs-callout. All fields are yours — no live network table.
+      </p>
+
+      <div class="field-grid four">
+        <div>
+          <label for="kwh">kWh delivered</label>
+          <input id="kwh" type="number" min="0" step="0.01" inputmode="decimal" placeholder="e.g. 28.4" />
+        </div>
+        <div>
+          <label for="energyMode">Energy input mode</label>
+          <select id="energyMode">
+            <option value="rate">$/kWh × kWh</option>
+            <option value="total">Total energy $ (from receipt)</option>
+          </select>
+        </div>
+        <div id="rateField">
+          <label for="rateKwh">Energy rate ($/kWh)</label>
+          <input id="rateKwh" type="number" min="0" step="0.001" inputmode="decimal" placeholder="e.g. 0.49" />
+        </div>
+        <div id="energyTotalField" hidden>
+          <label for="energyTotal">Total energy $ (receipt)</label>
+          <input id="energyTotal" type="number" min="0" step="0.01" inputmode="decimal" placeholder="e.g. 14.20" />
+        </div>
+        <div>
+          <label for="minutes">Minutes connected</label>
+          <input id="minutes" type="number" min="0" step="0.1" inputmode="decimal" placeholder="e.g. 32" />
+        </div>
+      </div>
+
+      <div class="field-grid four">
+        <div>
+          <label for="rateMin">Time rate ($/min)</label>
+          <input id="rateMin" type="number" min="0" step="0.01" inputmode="decimal" placeholder="e.g. 0.00" />
+        </div>
+        <div>
+          <label for="sessionFee">Session fee ($)</label>
+          <input id="sessionFee" type="number" min="0" step="0.01" inputmode="decimal" placeholder="e.g. 0.49" />
+        </div>
+        <div>
+          <label for="idleFee">Idle fee ($)</label>
+          <input id="idleFee" type="number" min="0" step="0.01" inputmode="decimal" placeholder="e.g. 0.00" />
+        </div>
+        <div>
+          <label for="refDcfc">Typical DCFC ref ($/kWh, optional)</label>
+          <input id="refDcfc" type="number" min="0" step="0.001" inputmode="decimal" placeholder="e.g. 0.45" />
+        </div>
+      </div>
+
+      <div class="field-grid four">
+        <div>
+          <label for="network">Network (label only)</label>
+          <select id="network">
+            <option value="ChargePoint">ChargePoint</option>
+            <option value="EVgo">EVgo</option>
+            <option value="Electrify America">Electrify America</option>
+            <option value="Dealer / other">Dealer / other</option>
+            <option value="Unknown / sticker">Unknown / sticker</option>
+          </select>
+        </div>
+        <div>
+          <label for="sessionLabel">Session label (optional)</label>
+          <input id="sessionLabel" type="text" maxlength="72" placeholder="e.g. road-trip L2 · dealer DCFC" autocomplete="off" />
+        </div>
+        <div></div>
+        <div></div>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn btn-primary" id="cardBtn">Show Session card</button>
+        <button type="button" class="btn" id="clearBtn">Clear</button>
+      </div>
+      <p class="status" id="status" aria-live="polite"></p>
+
+      <h3 class="subhead">Seed examples (teaching receipts — not live rates)</h3>
+      <div class="seed-chips" id="seedChips" role="list" aria-label="Seed session examples"></div>
+    </section>
+
+    <section class="panel card-panel" aria-labelledby="card-heading" id="cardSection" hidden>
+      <div class="card-toolbar">
+        <h2 id="card-heading">2. Shareable Session card</h2>
+        <div class="actions">
+          <button type="button" class="btn" id="copySummary">Copy summary</button>
+          <button type="button" class="btn" id="shareBtn">Share link</button>
+          <button type="button" class="btn" id="pngBtn">Export PNG</button>
+        </div>
+      </div>
+
+      <!-- PRIMARY VISUAL: fee stack card — giant all-in + effective $/kWh + stacked bars -->
+      <article class="session-card" id="sessionCard" aria-labelledby="sessionHeadline">
+        <header class="card-head">
+          <div>
+            <p class="brand-line">EV Session Reality</p>
+            <p class="meta-line" id="cardMeta">—</p>
+            <h3 id="sessionHeadline">All-in session</h3>
+          </div>
+          <div class="verdict" id="effBadge">
+            <span class="verdict-k" id="effPill">—</span>
+            <span class="verdict-s">Effective $/kWh</span>
+          </div>
+        </header>
+
+        <div class="hero-row">
+          <div class="hero-stat">
+            <span class="hero-kicker">True all-in $</span>
+            <span class="hero-value" id="allinVal">—</span>
+            <span class="hero-sub" id="allinSub">—</span>
+          </div>
+          <div class="hero-stat fee">
+            <span class="hero-kicker">Effective $/kWh</span>
+            <span class="hero-value" id="effVal">—</span>
+            <span class="hero-sub" id="effSub">—</span>
+          </div>
+        </div>
+
+        <div class="fee-stack-block" role="img" aria-labelledby="feeStackLabel">
+          <div class="fee-bar-head">
+            <span id="feeStackLabel">Fee stack (energy · time · session · idle)</span>
+            <span class="mono" id="feeStackTotal">—</span>
+          </div>
+          <div class="fee-stack-track" id="feeStackTrack">
+            <div class="seg energy" id="segEnergy" style="width:0%"></div>
+            <div class="seg time" id="segTime" style="width:0%"></div>
+            <div class="seg session" id="segSession" style="width:0%"></div>
+            <div class="seg idle" id="segIdle" style="width:0%"></div>
+          </div>
+          <div class="fee-bar-legend">
+            <span><i class="swatch energy"></i> Energy</span>
+            <span><i class="swatch time"></i> Time</span>
+            <span><i class="swatch session"></i> Session</span>
+            <span><i class="swatch idle"></i> Idle</span>
+          </div>
+        </div>
+
+        <div class="receipt-strip" id="receiptStrip" aria-label="Fee breakdown">
+          <div class="r-item"><span class="r-k">Energy</span><span class="r-v" id="rEnergy">—</span></div>
+          <div class="r-item"><span class="r-k">Time</span><span class="r-v" id="rTime">—</span></div>
+          <div class="r-item"><span class="r-k">Session</span><span class="r-v" id="rSession">—</span></div>
+          <div class="r-item"><span class="r-k">Idle</span><span class="r-v" id="rIdle">—</span></div>
+        </div>
+
+        <p class="vs-line" id="vsLine" hidden></p>
+        <p class="tip-line" id="tipLine">Check the app (or sticker) price before you plug — map pins are not a price guarantee.</p>
+
+        <footer class="card-foot">
+          <span>User-pasted numbers · no scrape</span>
+          <span>Estimates only · networks vary</span>
+        </footer>
+      </article>
+
+      <div class="share-box" id="shareBox" hidden>
+        <label for="shareUrl">Share URL (hash restores your pasted numbers)</label>
+        <div class="row">
+          <input id="shareUrl" type="text" readonly />
+          <button type="button" class="btn" id="copyShare" style="flex:0 0 auto">Copy</button>
+        </div>
+        <p class="hint">Append UTM when you post, e.g. <code>?utm_source=reddit&amp;utm_medium=organic&amp;utm_campaign=ev_session_mvp</code></p>
+      </div>
+
+      <div class="source-links" id="sourceLinks"></div>
+    </section>
+
+    <section class="panel legend" aria-labelledby="legend-heading">
+      <h2 id="legend-heading">How to read the card</h2>
+      <ul class="legend-list">
+        <li><span class="pill allin">All-in $</span> Energy + time + session + idle from your paste. Nothing invented.</li>
+        <li><span class="pill fee">Effective $/kWh</span> All-in ÷ kWh delivered. The number that makes short L2 sessions and idle shocks comparable.</li>
+        <li><span class="pill stack">Fee stack</span> Proportional bars for energy · per-min time · flat session · idle. Empty segments stay zero — honest empty state.</li>
+        <li><strong>vs typical DCFC</strong> Optional callout only when you paste a reference $/kWh — never a hardcoded “live network rate.”</li>
+        <li><strong>Tip footer</strong> Calm “check app before plug” — literacy, not a lawsuit pitch.</li>
+      </ul>
+    </section>
+
+    <footer>
+      <strong>EV Session Reality</strong> — receipt → honest share card for public-charger fee stacks.
+      <ul>
+        <li>kWh · minutes · session · idle → all-in + effective $/kWh</li>
+        <li>User paste only · labeled seeds · no scrape · estimates; networks vary</li>
+        <li>Free utility · ad-supported path (see README)</li>
+      </ul>
+    </footer>
+    <canvas id="pngCanvas" width="900" height="820" hidden aria-hidden="true"></canvas>
+  </div>
+</body>
+</html>
