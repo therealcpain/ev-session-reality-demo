@@ -171,6 +171,7 @@
             <div class="seg session" id="segSession" style="width:0%"></div>
             <div class="seg idle" id="segIdle" style="width:0%"></div>
           </div>
+          <p class="stack-dominance" id="stackDominance" hidden></p>
           <div class="fee-bar-legend">
             <span><i class="swatch energy"></i> Energy</span>
             <span><i class="swatch time"></i> Time</span>
@@ -212,7 +213,7 @@
       <ul class="legend-list">
         <li><span class="pill allin">All-in $</span> Energy + time + session + idle from your paste. Nothing invented.</li>
         <li><span class="pill fee">Effective $/kWh</span> All-in ÷ kWh delivered. The number that makes short L2 sessions and idle shocks comparable.</li>
-        <li><span class="pill stack">Fee stack</span> Proportional bars for energy · per-min time · flat session · idle. Empty segments stay zero — honest empty state.</li>
+        <li><span class="pill stack">Fee stack</span> Proportional bars for energy · per-min time · flat session · idle. Dominance line names the largest share in text (not color-only). Empty segments stay zero — honest empty state.</li>
         <li><strong>vs typical DCFC</strong> Optional callout only when you paste a reference $/kWh — never a hardcoded “live network rate.”</li>
         <li><strong>Tip footer</strong> Calm “check app before plug” — literacy, not a lawsuit pitch.</li>
       </ul>

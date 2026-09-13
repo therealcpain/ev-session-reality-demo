@@ -436,6 +436,19 @@ input:focus, select:focus {
 .seg.session { background: linear-gradient(90deg, rgba(240, 180, 41, 0.95), rgba(240, 180, 41, 0.6)); }
 .seg.idle { background: linear-gradient(90deg, rgba(240, 113, 120, 0.95), rgba(240, 113, 120, 0.6)); }
 
+.stack-dominance {
+  margin: 0.45rem 0 0;
+  font-size: 0.88rem;
+  font-weight: 650;
+  color: var(--fg);
+  letter-spacing: -0.01em;
+}
+
+.stack-dominance[data-key="energy"] { color: var(--energy); }
+.stack-dominance[data-key="time"] { color: var(--time); }
+.stack-dominance[data-key="session"] { color: var(--session); }
+.stack-dominance[data-key="idle"] { color: var(--idle); }
+
 .fee-bar-legend {
   display: flex;
   flex-wrap: wrap;
@@ -481,6 +494,12 @@ input:focus, select:focus {
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
+}
+
+.r-item.dominant {
+  border-color: rgba(240, 180, 41, 0.55);
+  background: rgba(240, 180, 41, 0.08);
+  box-shadow: inset 3px 0 0 var(--warn);
 }
 
 .r-k {

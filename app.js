@@ -280,6 +280,46 @@
     };
   }
 
+  /** Largest fee-stack share — text dominance, not color-only. */
+  function dominantShare(m, shares) {
+    if (m.allIn <= 0) return null;
+    const keys = ["energy", "time", "session", "idle"];
+    let best = keys[0];
+    keys.forEach((k) => {
+      if (shares[k] > shares[best]) best = k;
+    });
+    const labels = {
+      energy: "Energy",
+      time: "Time",
+      session: "Session",
+      idle: "Idle",
+    };
+    const amounts = {
+      energy: m.energy,
+      time: m.time,
+      session: m.session,
+      idle: m.idle,
+    };
+    const pct = shares[best];
+    // Only call "dominates" when clearly largest (≥35% or strictly ahead)
+    const verb = pct >= 55 ? "dominates" : "leads";
+    return {
+      key: best,
+      label: labels[best],
+      amount: amounts[best],
+      pct: pct,
+      text:
+        labels[best] +
+        " " +
+        verb +
+        " · " +
+        pct.toFixed(0) +
+        "% of all-in (" +
+        money(amounts[best]) +
+        ")",
+    };
+  }
+
   function renderCard() {
     const input = readInputs();
     const hasAny =
@@ -342,6 +382,27 @@
     $("segSession").style.width = shares.session + "%";
     $("segIdle").style.width = shares.idle + "%";
     $("feeStackTotal").textContent = money(m.allIn);
+
+    const dom = dominantShare(m, shares);
+    const domEl = $("stackDominance");
+    document.querySelectorAll(".r-item").forEach((el) => el.classList.remove("dominant"));
+    if (dom) {
+      domEl.hidden = false;
+      domEl.textContent = dom.text;
+      domEl.setAttribute("data-key", dom.key);
+      const map = {
+        energy: "rEnergy",
+        time: "rTime",
+        session: "rSession",
+        idle: "rIdle",
+      };
+      const rv = $(map[dom.key]);
+      if (rv && rv.parentElement) rv.parentElement.classList.add("dominant");
+    } else {
+      domEl.hidden = true;
+      domEl.textContent = "";
+      domEl.removeAttribute("data-key");
+    }
 
     const energyDetail =
       input.energyMode === "total"
@@ -604,6 +665,13 @@
       x += w;
     });
 
+    const dom = dominantShare(m, shares);
+    if (dom) {
+      ctx.fillStyle = "#e8eef4";
+      ctx.font = "600 14px IBM Plex Sans, sans-serif";
+      ctx.fillText(dom.text, 56, 402);
+    }
+
     // Receipt strip — 4 items
     const rx = [56, 268, 480, 692];
     const labels = ["ENERGY", "TIME", "SESSION", "IDLE"];
@@ -613,20 +681,27 @@
       money(m.session),
       money(m.idle),
     ];
+    const keys = ["energy", "time", "session", "idle"];
     for (let i = 0; i < 4; i++) {
-      roundRect(ctx, rx[i], 408, 152, 70, 10);
-      ctx.fillStyle = "#1a222c";
+      roundRect(ctx, rx[i], 418, 152, 70, 10);
+      const isDom = dom && dom.key === keys[i];
+      ctx.fillStyle = isDom ? "rgba(240,180,41,0.12)" : "#1a222c";
       ctx.fill();
+      if (isDom) {
+        ctx.strokeStyle = "rgba(240,180,41,0.55)";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
       ctx.fillStyle = "#8b9aab";
       ctx.font = "700 11px IBM Plex Sans, sans-serif";
-      ctx.fillText(labels[i], rx[i] + 14, 432);
+      ctx.fillText(labels[i] + (isDom ? " · LEADS" : ""), rx[i] + 14, 442);
       ctx.fillStyle = "#e8eef4";
       ctx.font = "500 18px IBM Plex Mono, monospace";
-      ctx.fillText(vals[i], rx[i] + 14, 460);
+      ctx.fillText(vals[i], rx[i] + 14, 470);
     }
 
     // vs callout
-    let tipY = 510;
+    let tipY = 520;
     if (input.refDcfc != null && input.refDcfc > 0 && Number.isFinite(m.eff)) {
       roundRect(ctx, 56, tipY, W - 112, 52, 12);
       ctx.fillStyle = "rgba(240,180,41,0.1)";
